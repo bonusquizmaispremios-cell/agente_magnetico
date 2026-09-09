@@ -194,7 +194,7 @@ def exportar_historico_txt() -> str:
         linhas.append(f"Entrada: {item['entrada']}\nAnálise:\n{item['saida']}\n" + "-"*40)
     return "\n".join(linhas)
 
-def banner_manual():
+def banner_manual(key_suffix="1"):
     manual_txt = """AGENTE MAGNÉTICO — Manual Completo de Funcionalidades
 Versão Milhão 2026
 ======================================================
@@ -242,7 +242,8 @@ Relatório gerado por IA com análise da sua evolução.
         data=manual_txt.encode("utf-8"),
         file_name="manual_agente_magnetico.txt",
         mime="text/plain",
-        use_container_width=False
+        use_container_width=False,
+        key=f"dl_manual_{key_suffix}"
     )
 
 # ── BARRA LATERAL DE SALVAR/CARREGAR ─────────────────────────
@@ -340,7 +341,7 @@ elif st.session_state.etapa == "App":
     # MODO DARK DESATIVADO — padrão claro igual aos demais apps
 
     # BANNER DO MANUAL
-    banner_manual()
+    banner_manual(key_suffix="1")
 
     # ── BARRA DE SALVAR — SEMPRE VISÍVEL ─────────────────────
 
@@ -442,56 +443,6 @@ def exportar_historico_txt() -> str:
         linhas.append(f"Entrada: {item['entrada']}\nAnálise:\n{item['saida']}\n" + "-"*40)
     return "\n".join(linhas)
 
-def banner_manual():
-    manual_txt = """AGENTE MAGNÉTICO — Manual Completo de Funcionalidades
-Versão Milhão 2026
-======================================================
-
-🏠 HOME — Painel Principal
-Tela inicial com estatísticas em tempo real.
-
-⚡ RESPOSTA RÁPIDA
-Gera 3 opções de resposta imediata para qualquer mensagem recebida.
-
-💬 TURBINAR MENSAGEM
-A IA reescreve sua mensagem com gatilhos poderosos.
-
-🧠 ANALISAR CONVERSA
-Diagnóstico completo de uma conversa inteira.
-
-🎭 ROLEPLAY — TREINE ANTES DE ENVIAR
-Simule uma conversa com a pessoa antes de falar de verdade.
-
-📚 BIBLIOTECA DE ABERTURAS
-Banco pessoal de mensagens de abertura salvas.
-
-📸 ANÁLISE DE PERFIL E BIO
-Leitura de personalidade + abordagem ideal.
-
-⚔️ COMPARAR DUAS CONVERSAS
-Analise duas conversas lado a lado.
-
-🗓️ PLANO DE CONQUISTA — 7 DIAS
-Roteiro personalizado de ações para os próximos 7 dias.
-
-🚩 DETECTOR DE RED FLAGS
-Identifica sinais de desinteresse ou comportamento problemático.
-
-📈 PROGRESSO
-Histórico completo com filtros, favoritos e exportação.
-
-📋 RESUMO SEMANAL
-Relatório gerado por IA com análise da sua evolução.
-
-"""
-    st.download_button(
-        label="📖 Baixar Manual Completo do Agente Magnético",
-        data=manual_txt.encode("utf-8"),
-        file_name="manual_agente_magnetico.txt",
-        mime="text/plain",
-        use_container_width=False
-    )
-
 # ── BARRA LATERAL DE SALVAR/CARREGAR ─────────────────────────
 def barra_salvar():
     """Botão discreto para salvar dados no computador — aparece no topo do app."""
@@ -587,7 +538,7 @@ elif st.session_state.etapa == "App":
     # MODO DARK DESATIVADO — padrão claro igual aos demais apps
 
     # BANNER DO MANUAL
-    banner_manual()
+    banner_manual(key_suffix="2")
 
     # ── BARRA DE SALVAR — SEMPRE VISÍVEL ─────────────────────
 
