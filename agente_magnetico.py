@@ -174,6 +174,7 @@ def extrair_interesse(texto_ia: str) -> int:
 
 def salvar_historico(tipo: str, entrada: str, saida: str):
     st.session_state.historico.append({
+        'nivel_interesse': 5,
         'data': datetime.now().strftime('%d/%m %H:%M'),
         'tipo': tipo,
         'entrada': entrada[:80] + ('...' if len(entrada) > 80 else ''),
@@ -187,15 +188,15 @@ def calcular_stats():
     total = len(h)
     if total == 0:
         return 0, 0, 0
-    media = sum(x['nivel_interesse'] for x in h) / total
-    quentes = sum(1 for x in h if x['nivel_interesse'] >= 7)
+    media = sum(x.get('nivel_interesse', 5) for x in h) / total
+    quentes = sum(1 for x in h if x.get('nivel_interesse', 0) >= 7)
     return total, round(media, 1), round((quentes / total) * 100)
 
 def exportar_historico_txt() -> str:
     linhas = [f"AGENTE MAGNÉTICO — Histórico de {st.session_state.usuario}\n{'='*50}\n"]
     for item in st.session_state.historico:
-        linhas.append(f"[{item['data']}] {item['tipo']} | Interesse: {item['nivel_interesse']}/10")
-        linhas.append(f"Entrada: {item['entrada']}\nAnálise:\n{item['saida']}\n" + "-"*40)
+        linhas.append(f"[{item.get('data','')}] {item.get('tipo','')} | Interesse: {item.get('nivel_interesse', item.get('nivel','-'))}/10")
+        linhas.append(f"Entrada: {item.get('entrada','')}\nAnálise:\n{item.get('saida','')}\n" + "-"*40)
     return "\n".join(linhas)
 
 def banner_manual(key_suffix="1"):
@@ -401,7 +402,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Gerando respostas..."):
                     prompt = f"Mensagem recebida: '{msg_r}'\nContexto: {contexto_r or 'não informado'}\nTom desejado: {tom_r}\n\nGere EXATAMENTE 3 opções de resposta numeradas (1. 2. 3.) com tom {tom_r}. Cada resposta em linha separada."
                     resp = mentor_milhao(prompt)
-                st.session_state.historico.append({"data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Resposta Rápida", "nivel": "⚡", "entrada": msg_r[:100], "saida": resp})
+                st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Resposta Rápida", "nivel": "⚡", "entrada": msg_r[:100], "saida": resp})
                 st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
                 st.download_button("📋 Baixar", data=resp, file_name="respostas.txt", key="dl_rapida_res1")
             else:
@@ -421,7 +422,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Turbinando..."):
                     prompt = f"Mensagem original: '{msg_t}'\nObjetivo: {obj_t}\nIntensidade: {nivel_t}\n\nReescreva com gatilhos psicológicos. Mostre: VERSÃO ORIGINAL / VERSÃO TURBINADA / POR QUE FUNCIONA"
                     resp = mentor_milhao(prompt)
-                st.session_state.historico.append({"data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Turbinar", "nivel": "💬", "entrada": msg_t[:100], "saida": resp})
+                st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Turbinar", "nivel": "💬", "entrada": msg_t[:100], "saida": resp})
                 st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
             else:
                 st.warning("Digite sua mensagem primeiro.")
@@ -435,7 +436,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Analisando..."):
                     prompt = f"Conversa para analisar:\n{conv_a}\n\nFaça diagnóstico completo: 1) Nível de interesse atual (0-10) 2) Dinâmica de poder 3) Erros cometidos 4) Acertos 5) Próximos 3 passos estratégicos"
                     resp = mentor_milhao(prompt)
-                st.session_state.historico.append({"data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Analisar", "nivel": "🧠", "entrada": conv_a[:100], "saida": resp})
+                st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Analisar", "nivel": "🧠", "entrada": conv_a[:100], "saida": resp})
                 st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
             else:
                 st.warning("Cole a conversa primeiro.")
@@ -498,7 +499,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Lendo o perfil..."):
                     prompt_p = f"Perfil/Bio para analisar:\n{bio_p}\n\nFaça leitura completa: 1) Personalidade provável 2) O que ela valoriza 3) Como se aproximar 4) Tom ideal para falar com ela 5) O que NUNCA fazer"
                     resp_p = mentor_milhao(prompt_p)
-                st.session_state.historico.append({"data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Análise de Perfil", "nivel": "📸", "entrada": bio_p[:100], "saida": resp_p})
+                st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Análise de Perfil", "nivel": "📸", "entrada": bio_p[:100], "saida": resp_p})
                 st.markdown(f"<div class='card'>{resp_p}</div>", unsafe_allow_html=True)
             else:
                 st.warning("Cole o perfil primeiro.")
@@ -543,7 +544,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Analisando sinais..."):
                     prompt_rf = f"Conversa:\n{conv_rf}\n\nDetecte RED FLAGS: comportamentos passivos-agressivos, ghosting, manipulação, falta de interesse real, inconsistências. Avalie risco (baixo/médio/alto) e o que fazer."
                     resp_rf = mentor_milhao(prompt_rf)
-                st.session_state.historico.append({"data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Red Flags", "nivel": "🚩", "entrada": conv_rf[:100], "saida": resp_rf})
+                st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Red Flags", "nivel": "🚩", "entrada": conv_rf[:100], "saida": resp_rf})
                 st.markdown(f"<div class='card'>{resp_rf}</div>", unsafe_allow_html=True)
             else:
                 st.warning("Cole a conversa primeiro.")
