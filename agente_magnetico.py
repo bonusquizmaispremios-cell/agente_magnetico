@@ -131,6 +131,8 @@ defaults = {
     'resumo_gerado_em': None,
     'plano_conquista': "",
     'plano_pessoa': "",
+    'xp_total': 0,
+    'nivel': "Iniciante",
 }
 for k, v in defaults.items():
     if k not in st.session_state:
