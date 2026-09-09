@@ -115,6 +115,8 @@ def carregar_json_sessao(dados: dict):
     st.session_state.plano_pessoa    = dados.get('plano_pessoa', '')
 
 # --- INICIALIZAÇÃO DE ESTADO ---
+CHAVES_SALVAR = ['usuario', 'pagina', 'modo_confianca', 'modo_dark', 'historico', 'biblioteca', 'roleplay_hist', 'roleplay_ativo', 'roleplay_perfil', 'roleplay_situacao', 'resumo_semanal', 'resumo_gerado_em', 'plano_conquista', 'plano_pessoa', 'xp_total', 'nivel']
+
 defaults = {
     'etapa': "Login",
     'usuario': "", 'api_key': "",
