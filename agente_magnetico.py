@@ -275,6 +275,7 @@ def barra_salvar():
             file_name=f"agente_magnetico_{nome_usuario}.json",
             mime="application/json",
             use_container_width=True,
+            key="agentema1"
         )
 
     st.markdown("<hr class='divider-rosa'>", unsafe_allow_html=True)
@@ -289,11 +290,11 @@ if st.session_state.etapa == "Login":
         st.markdown("""<div style="background:#FFF0F5;border:1px solid #FFB6C1;border-radius:10px;
         padding:10px 16px;margin:10px 0 16px 0;font-size:0.88em;color:#000;line-height:1.6;">
         🔒 <strong>ACESSO RESTRITO A ASSOCIADOS DO QUIZ COM PRÊMIOS</strong><br>
-        🔗 <a href="https://quizcompremios.com.br/" target="_blank"
+        🔗 <a href="https://quizcompremios.com.br" target="_blank"
         style="color:#C2185B;font-weight:600;text-decoration:none;">quizcompremios.com.br</a>
         </div>""", unsafe_allow_html=True)
         nome = st.text_input("Seu Nome:", key="input_nome_login")
-        chave = st.text_input("Sua Chave API da Groq:", type="password", key="agentema1")
+        chave = st.text_input("Sua Chave API da Groq:", type="password", key="agentema1_d2")
 
 
         # ── UPLOADER: carrega dados se o servidor tiver zerado ──
