@@ -123,7 +123,7 @@ def carregar_json_sessao(dados):
         st.session_state[k] = v
 
 # --- INICIALIZAÇÃO DE ESTADO ---
-CHAVES_SALVAR = ['usuario', 'pagina', 'modo_confianca', 'modo_dark', 'historico', 'biblioteca', 'roleplay_hist', 'roleplay_ativo', 'roleplay_perfil', 'roleplay_situacao', 'resumo_semanal', 'resumo_gerado_em', 'plano_conquista', 'plano_pessoa', 'xp_total', 'nivel']
+CHAVES_SALVAR = ['usuario', 'pagina', 'modo_confianca', 'modo_dark', 'historico', 'biblioteca', 'roleplay_hist', 'roleplay_ativo', 'roleplay_perfil', 'roleplay_situacao', 'resumo_semanal', 'resumo_gerado_em', 'plano_conquista', 'plano_pessoa', 'plano_resultado', 'plano_objetivo', 'xp_total', 'nivel', 'res_turbinar', 'res_analisar', 'input_turbinar', 'input_analisar', 'res_perfil', 'res_comparar']
 
 defaults = {
     'etapa': "Login",
@@ -141,6 +141,10 @@ defaults = {
     'resumo_gerado_em': None,
     'plano_conquista': "",
     'plano_pessoa': "",
+    'plano_resultado': "",
+    'plano_objetivo': "",
+    'res_comparar': "",
+    'res_perfil': "",
     'xp_total': 0,
     'nivel': "Iniciante",
 }
@@ -432,6 +436,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Gerando respostas..."):
                     prompt = f"Mensagem recebida: '{msg_r}'\nContexto: {contexto_r or 'não informado'}\nTom desejado: {tom_r}\n\nGere EXATAMENTE 3 opções de resposta numeradas (1. 2. 3.) com tom {tom_r}. Cada resposta em linha separada."
                     resp = mentor_milhao(prompt)
+                    if resp: st.session_state['res_rapida_agente1'] = str(resp)
                 st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Resposta Rápida", "nivel": "⚡", "entrada": msg_r[:100], "saida": resp})
                 st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
                 st.download_button("📋 Baixar", data=resp, file_name="respostas.txt", key="dl_rapida_res1")
@@ -452,10 +457,16 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Turbinando..."):
                     prompt = f"Mensagem original: '{msg_t}'\nObjetivo: {obj_t}\nIntensidade: {nivel_t}\n\nReescreva com gatilhos psicológicos. Mostre: VERSÃO ORIGINAL / VERSÃO TURBINADA / POR QUE FUNCIONA"
                     resp = mentor_milhao(prompt)
+                    if resp: st.session_state['res_turbinar_agente2'] = str(resp)
                 st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Turbinar", "nivel": "💬", "entrada": msg_t[:100], "saida": resp})
-                st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
+                st.session_state['res_turbinar'] = resp
+                st.session_state['input_turbinar'] = msg_t
+                st.rerun()
             else:
                 st.warning("Digite sua mensagem primeiro.")
+        if st.session_state.get('res_turbinar'):
+            st.markdown(f"<div class='card'>{st.session_state['res_turbinar']}</div>", unsafe_allow_html=True)
+            st.download_button("📋 Baixar", data=st.session_state['res_turbinar'], file_name="turbinar.txt", key="dl_turbinar_res1")
 
     with _tab_Analisar:
         st.header("🧠 Analisar Conversa")
@@ -466,10 +477,16 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Analisando..."):
                     prompt = f"Conversa para analisar:\n{conv_a}\n\nFaça diagnóstico completo: 1) Nível de interesse atual (0-10) 2) Dinâmica de poder 3) Erros cometidos 4) Acertos 5) Próximos 3 passos estratégicos"
                     resp = mentor_milhao(prompt)
+                    if resp: st.session_state['res_analisar_agente3'] = str(resp)
                 st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Analisar", "nivel": "🧠", "entrada": conv_a[:100], "saida": resp})
-                st.markdown(f"<div class='card'>{resp}</div>", unsafe_allow_html=True)
+                st.session_state['res_analisar'] = resp
+                st.session_state['input_analisar'] = conv_a
+                st.rerun()
             else:
                 st.warning("Cole a conversa primeiro.")
+        if st.session_state.get('res_analisar'):
+            st.markdown(f"<div class='card'>{st.session_state['res_analisar']}</div>", unsafe_allow_html=True)
+            st.download_button("📋 Baixar análise", data=st.session_state['res_analisar'], file_name="analise.txt", key="dl_analisar_res1")
 
     with _tab_Roleplay:
         st.header("🎭 Roleplay — Treine Antes de Enviar")
@@ -491,6 +508,7 @@ elif st.session_state.etapa == "App":
                         hist_txt = "\n".join(f"{'Você' if m['role']=='user' else 'Personagem'}: {m['content']}" for m in st.session_state.roleplay_hist[-10:])
                         prompt_rp = f"Perfil: {perfil_rp}\n\nConversa:\n{hist_txt}\n\nResponda como a personagem de forma realista. Depois avalie minha última mensagem (1 linha)."
                         resp_rp = mentor_milhao(prompt_rp)
+                        if resp_rp: st.session_state['res_roleplay_agente4'] = str(resp_rp)
                     st.session_state.roleplay_hist.append({"role":"assistant","content":resp_rp})
                     st.rerun()
         with col_rp2:
@@ -529,6 +547,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Lendo o perfil..."):
                     prompt_p = f"Perfil/Bio para analisar:\n{bio_p}\n\nFaça leitura completa: 1) Personalidade provável 2) O que ela valoriza 3) Como se aproximar 4) Tom ideal para falar com ela 5) O que NUNCA fazer"
                     resp_p = mentor_milhao(prompt_p)
+                    if resp_p: st.session_state['res_perfil_agente5'] = str(resp_p)
                 st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Análise de Perfil", "nivel": "📸", "entrada": bio_p[:100], "saida": resp_p})
                 st.markdown(f"<div class='card'>{resp_p}</div>", unsafe_allow_html=True)
             else:
@@ -547,6 +566,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Comparando..."):
                     prompt_c = f"Conversa A:\n{conv_c1}\n\nConversa B:\n{conv_c2}\n\nCompare as duas: qual está indo melhor, quais os erros de cada uma e o que fazer em cada caso."
                     resp_c = mentor_milhao(prompt_c)
+                    if resp_c: st.session_state['res_comparar_agente6'] = str(resp_c)
                 st.markdown(f"<div class='card'>{resp_c}</div>", unsafe_allow_html=True)
             else:
                 st.warning("Cole as duas conversas.")
@@ -554,16 +574,26 @@ elif st.session_state.etapa == "App":
     with _tab_Plano:
         st.header("🗓️ Plano 7 Dias")
         st.markdown("Plano estratégico personalizado para avançar ou reconquistar em 7 dias.")
-        sit_p = st.text_area("📋 Sua situação atual:", height=120, key="ta_plano_sit1", placeholder="Descreva onde você está na conversa...")
+        sit_p = st.text_area("📋 Sua situação atual:", height=120, key="ta_plano_sit1",
+            value=st.session_state.get('plano_conquista',''),
+            placeholder="Descreva onde você está na conversa...")
         obj_p7 = st.selectbox("🎯 Objetivo:", ["Marcar encontro","Criar interesse","Reconquistar","Avançar no relacionamento","Sair da friendzone"], key="sel_plano_obj1")
         if st.button("🗓️ GERAR PLANO", key="btn_plano1", use_container_width=True):
             if sit_p.strip():
                 with st.spinner("Criando plano..."):
                     prompt_p7 = f"Situação: {sit_p}\nObjetivo: {obj_p7}\n\nCrie um plano dia a dia (Dia 1 a Dia 7) com ações específicas, mensagens sugeridas e o que fazer se ela responder bem ou não."
                     resp_p7 = mentor_milhao(prompt_p7)
-                st.markdown(f"<div class='card'>{resp_p7}</div>", unsafe_allow_html=True)
+                    if resp_p7: st.session_state['res_plano_agente7'] = str(resp_p7)
+                st.session_state['plano_conquista'] = sit_p
+                st.session_state['plano_resultado'] = resp_p7
+                st.session_state['plano_objetivo'] = obj_p7
+                st.rerun()
             else:
                 st.warning("Descreva sua situação.")
+        if st.session_state.get('plano_resultado'):
+            st.markdown(f"<div class='card'>{st.session_state['plano_resultado']}</div>", unsafe_allow_html=True)
+            st.download_button("📋 Baixar plano", data=st.session_state['plano_resultado'],
+                file_name="plano_7dias.txt", key="dl_plano_res1")
 
     with _tab_RedFlags:
         st.header("🚩 Detector de Red Flags")
@@ -574,6 +604,7 @@ elif st.session_state.etapa == "App":
                 with st.spinner("Analisando sinais..."):
                     prompt_rf = f"Conversa:\n{conv_rf}\n\nDetecte RED FLAGS: comportamentos passivos-agressivos, ghosting, manipulação, falta de interesse real, inconsistências. Avalie risco (baixo/médio/alto) e o que fazer."
                     resp_rf = mentor_milhao(prompt_rf)
+                    if resp_rf: st.session_state['res_redflags_agente8'] = str(resp_rf)
                 st.session_state.historico.append({"nivel_interesse": 5, "data": datetime.now().strftime("%d/%m %H:%M"), "tipo": "Red Flags", "nivel": "🚩", "entrada": conv_rf[:100], "saida": resp_rf})
                 st.markdown(f"<div class='card'>{resp_rf}</div>", unsafe_allow_html=True)
             else:
@@ -600,13 +631,14 @@ elif st.session_state.etapa == "App":
                     hist_txt = "\n".join(f"[{h['data']}] {h['tipo']}: {h['entrada'][:60]}" for h in st.session_state.historico[-30:])
                     prompt_rs = f"Histórico de interações da semana:\n{hist_txt}\n\nGere um resumo executivo: 1) Padrões identificados 2) Principais erros 3) Evolução percebida 4) Top 3 prioridades para a próxima semana"
                     resp_rs = mentor_milhao(prompt_rs)
+                    if resp_rs: st.session_state['res_resumo_agente9'] = str(resp_rs)
                 st.markdown(f"<div class='card'>{resp_rs}</div>", unsafe_allow_html=True)
         else:
             st.info("Faça algumas interações primeiro para gerar o resumo.")
         st.markdown("<hr class='divider'>", unsafe_allow_html=True)
         col_exp1, col_exp2 = st.columns(2)
         with col_exp1:
-            st.download_button("💾 Salvar dados (.json)", data=json.dumps({k:st.session_state.get(k) for k in CHAVES_SALVAR}, ensure_ascii=False, indent=2, default=str), file_name=f"agente_{st.session_state.usuario}.json", mime="application/json", key="dl_resumo_json1")
+            st.download_button("💾 Salvar dados (.json)", data=json.dumps({k: st.session_state.get(k) for k in list(st.session_state.keys()) if not k.startswith("_") and k not in ("api_key",)}, ensure_ascii=False, indent=2, default=str), file_name=f"agente_{st.session_state.usuario}.json", mime="application/json", key="dl_resumo_json1")
         with col_exp2:
             st.download_button("📥 Exportar histórico (.txt)", data=exportar_historico_txt(), file_name="historico_agente.txt", mime="text/plain", key="dl_resumo_txt1")
 
